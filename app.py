@@ -20,14 +20,15 @@ Adjust the variables below to see how acute psychological stress, blame culture,
 
 st.divider()
 
-# Sidebar for Model Coefficients (allowing fine-tuning based on your exact regression output)
+# Sidebar for Model Coefficients (Updated to match your new Python model)
 st.sidebar.header("🔧 Model Parameters (Regression Weights)")
 st.sidebar.markdown("Adjust these to match your final `regression_results.txt` coefficients.")
 
-beta_0 = st.sidebar.number_input("Intercept (Baseline Hours)", value=15.0, step=0.1)
-beta_1 = st.sidebar.number_input("Spotlight Effect Weight (Beta 1)", value=2.5, step=0.1)
-beta_2 = st.sidebar.number_input("CI/CD Automation Weight (Beta 2)", value=1.8, step=0.1)
-beta_3 = st.sidebar.number_input("Blameless Culture Weight (Beta 3)", value=2.1, step=0.1)
+# Updated defaults based on: MTTR = 20.0 + 2.0*Spotlight - 1.5*Blameless - 2.5*CICD
+beta_0 = st.sidebar.number_input("Intercept (Baseline Hours)", value=20.0, step=0.1)
+beta_1 = st.sidebar.number_input("Spotlight Effect Weight (Beta 1)", value=2.0, step=0.1)
+beta_2 = st.sidebar.number_input("CI/CD Automation Weight (Beta 2)", value=2.5, step=0.1)
+beta_3 = st.sidebar.number_input("Blameless Culture Weight (Beta 3)", value=1.5, step=0.1)
 
 # Main Page Layout: Two Columns for Inputs and Outputs
 col1, col2 = st.columns([1, 1], gap="large")
@@ -53,8 +54,8 @@ with col2:
     # T_r = beta_0 + beta_1*S - beta_2*C - beta_3*B
     predicted_mttr = beta_0 + (beta_1 * S) - (beta_2 * C) - (beta_3 * B)
     
-    # Prevent negative time in extreme mathematical scenarios
-    predicted_mttr = max(0.1, predicted_mttr)
+    # Prevent negative time in extreme mathematical scenarios (clamped to your 0.5 hour elite minimum)
+    predicted_mttr = max(0.5, predicted_mttr)
     
     # Display the result prominently
     st.metric(
@@ -82,7 +83,7 @@ st.markdown("See how MTTR changes across the entire spectrum of the Spotlight Ef
 # Generate data for the line chart based on the user's current settings
 spotlight_range = np.linspace(1.0, 5.0, 50)
 mttr_trend = beta_0 + (beta_1 * spotlight_range) - (beta_2 * C) - (beta_3 * B)
-mttr_trend = np.clip(mttr_trend, 0.1, None)
+mttr_trend = np.clip(mttr_trend, 0.5, 36.0) # Matched your Python script's 0.5 to 36 clamp
 
 chart_data = pd.DataFrame({
     'Spotlight Index (Stress)': spotlight_range,
